@@ -2,7 +2,7 @@
 SportsViu is an app for recording padel games, offering live highlights with pose detection (MoveNet model), and future features like gameplay heatmaps, miles run, and calories burned. Aimed at enhancing player performance analysis.
 
 
-Features
+#Features
 Pose Detection: Utilizes TensorFlow and TensorFlow Hub for cutting-edge pose detection.
 Player Movement Analysis: Offers insights into human movements specific to padel, enhancing strategic gameplay.
 Intelligent Highlight Creation: Automatically generates game highlights based on player gestures.
