@@ -119,12 +119,13 @@ def save_highlight_video(frames, output_path):
 
 def collect_right_hip_positions(person_keypoints, confidence_threshold, right_hip_positions):
     person_keypoints = person_keypoints.reshape((17, 3))  # Assuming COCO model format
-    right_hip = person_keypoints[12]  # Index 12 for right hip
+    right_hip = person_keypoints[16]  # Index 16 for right anckle
     rh_confidence = right_hip[2]
 
     if rh_confidence > confidence_threshold:
         # Only add position if confidence is high enough
         right_hip_positions.append(right_hip[:2])  # Append (x, y) of the right hip
+
 
 # Placeholder for frames
 frames = []
@@ -241,6 +242,10 @@ output_video_path = "/content/sample_data/output_video.mp4"
 cmd = f"ffmpeg -framerate 25 -i frame_%d.png -c:v libx264 -r 30 -pix_fmt yuv420p {output_video_path}"
 !{cmd}
 
+
+# Load the background image
+background_image = cv2.imread('/content/frame_0.png')
+
 # Assuming right_hip_positions is filled with the normalized (x, y) coordinates
 right_hip_positions_array = np.array(right_hip_positions)
 
@@ -273,6 +278,58 @@ plt.figure(figsize=(10, 10))
 plt.imshow(cv2.cvtColor(background_image, cv2.COLOR_BGR2RGB))
 plt.scatter(scaled_rotated_x, scaled_rotated_y, c='yellow', s=1)  # Use a small dot size
 plt.axis('off')
-plt.title('Right Hip Positions on game')
+plt.title('Players Positions on Game')
 plt.show()
+
+
+
+
+
+# Define SOURCE and TARGET polygons for perspective transformation
+SOURCE = np.float32([
+    [741, 380],
+    [1196, 387],
+    [2800, 1079],
+    [-1000, 1079]
+])
+
+TARGET_WIDTH = 10
+TARGET_HEIGHT = 21
+
+TARGET = np.float32([
+    [0, 0],
+    [TARGET_WIDTH - 1, 0],
+    [TARGET_WIDTH - 1, TARGET_HEIGHT - 1],
+    [0, TARGET_HEIGHT - 1],
+])
+
+# Calculate the transformation matrix from SOURCE to TARGET
+transformation_matrix = cv2.getPerspectiveTransform(SOURCE, TARGET)
+
+# Assuming the right ankle positions are stored in scaled_rotated_x and scaled_rotated_y
+# Combine them into a single array of (x, y) coordinates
+right_ankle_positions = np.column_stack((scaled_rotated_x, scaled_rotated_y))
+
+# Transform the ankle positions using the perspective transformation matrix
+right_ankle_positions_array = np.float32(right_ankle_positions).reshape(-1, 1, 2)  # Prepare for cv2.transform()
+transformed_ankles = cv2.perspectiveTransform(right_ankle_positions_array, transformation_matrix)
+transformed_ankles = transformed_ankles.reshape(-1, 2)  # Flatten back to original shape
+
+# Load the bird's-eye view court image (replace 'path_to_court_image.png' with your actual image path)
+court_image = cv2.imread('/content/sample_data/court.png')
+
+# You need to adjust the scale of the transformed points to fit the image dimensions
+scale_x = court_image.shape[1] / TARGET_WIDTH
+scale_y = court_image.shape[0] / TARGET_HEIGHT
+adjusted_x = transformed_ankles[:, 0] * scale_x
+adjusted_y = transformed_ankles[:, 1] * scale_y
+
+# Plot the transformed and adjusted ankle positions on the bird's-eye view court image
+plt.figure(figsize=(10, 10))
+plt.imshow(cv2.cvtColor(court_image, cv2.COLOR_BGR2RGB))  # Convert BGR to RGB for displaying with matplotlib
+plt.scatter(adjusted_x, adjusted_y, c='yellow', s=10)  # Plot the positions with yellow color and size 10
+plt.title('Players Positions on Court (Bird\'s-Eye View)')
+plt.axis('off')  # Hide the axes
+plt.show()
+
 
