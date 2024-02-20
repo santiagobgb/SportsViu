@@ -6,7 +6,7 @@ import numpy as np
 from collections import deque
 import subprocess
 import gdown
-from utils import loop_through_people, draw_keypoints, draw_connections, save_highlight_video, collect_right_hip_positions
+from utils import loop_through_people, draw_keypoints, draw_connections, save_highlight_video, collect_right_hip_positions, EDGES
 
 # Cargar el modelo TensorFlow Hub Movenet
 model = hub.load('https://tfhub.dev/google/movenet/multipose/lightning/1')
