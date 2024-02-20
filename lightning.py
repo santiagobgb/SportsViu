@@ -12,6 +12,7 @@ from google.colab.patches import cv2_imshow
 from collections import deque
 import os
 import subprocess
+import gdown
 import shutil
 
 model = hub.load('https://tfhub.dev/google/movenet/multipose/lightning/1')
@@ -140,7 +141,18 @@ hand_raise_threshold = 2
 right_hip_positions = []
 
 # Initialize VideoCapture
-cap = cv2.VideoCapture('/content/sample_data/IMG_8477.MP4')
+# Ruta local donde quieres guardar el video
+output_video_path = os.path.join(video_directory, 'IMG_8477.MP4')
+
+# URL de descarga directa del video de Google Drive
+url = 'https://drive.google.com/uc?id=1nU4WAkDbhcBs9LBTrDSyJKhVGrVsl9_A'
+
+# Descarga el archivo desde Google Drive
+gdown.download(url, output_video_path, quiet=False)
+
+# Ahora puedes usar el video descargado con OpenCV
+cap = cv2.VideoCapture(output_video_path)
+
 
 # Initialize an empty title
 current_title = 'NO SENAL'
@@ -241,6 +253,10 @@ for i, frame in enumerate(frames):
 output_video_path = "/content/sample_data/output_video.mp4"
 cmd = f"ffmpeg -framerate 25 -i frame_%d.png -c:v libx264 -r 30 -pix_fmt yuv420p {output_video_path}"
 !{cmd}
+
+
+
+
 
 
 # Load the background image
