@@ -6,6 +6,7 @@ import numpy as np
 from collections import deque
 import subprocess
 import gdown
+import matplotlib.pyplot as plt
 from utils import loop_through_people, draw_keypoints, draw_connections, save_highlight_video, collect_right_hip_positions, EDGES
 
 # Cargar el modelo TensorFlow Hub Movenet
@@ -64,7 +65,7 @@ while cap.isOpened():
             if nose_higher_frames > hand_raise_threshold and not hand_raised:
                 current_title = 'SENAL'
                 hand_raised = True
-                highlight_video_path = os.path.join(data_path, f"highlight_video_{frame_count}.mp4")
+                highlight_video_path = os.path.join("output", f"highlight_video_{frame_count}.mp4")
                 save_highlight_video(list(frame_buffer), highlight_video_path)
         else:
             nose_higher_frames = max(0, nose_higher_frames - 1)
@@ -120,12 +121,14 @@ scaled_rotated_x = rotated_x * background_image.shape[1]
 scaled_rotated_y = rotated_y * background_image.shape[0]
 
 # Visualizar puntos rotados en la imagen de fondo
+output_path_background = "output/Players_Positions_on_Game.png"
 plt.figure(figsize=(10, 10))
 plt.imshow(cv2.cvtColor(background_image, cv2.COLOR_BGR2RGB))
 plt.scatter(scaled_rotated_x, scaled_rotated_y, c='yellow', s=1)
 plt.axis('off')
 plt.title('Players Positions on Game')
-plt.show()
+plt.savefig(output_path_background)
+plt.close()
 
 SOURCE = np.float32([
     [741, 380],
@@ -157,7 +160,7 @@ transformed_ankles = cv2.perspectiveTransform(right_ankle_positions_array, trans
 transformed_ankles = transformed_ankles.reshape(-1, 2)
 
 # Carga la imagen de la cancha con vista de pájaro (ajusta la ruta según tu entorno)
-court_image_path = "data/court.png"  # Ajusta esta ruta
+court_image_path = os.path.join("..", "data", "court.png")
 court_image = cv2.imread(court_image_path)
 
 # Ajusta la escala de los puntos transformados para que se ajusten a las dimensiones de la imagen
@@ -167,9 +170,11 @@ adjusted_x = transformed_ankles[:, 0] * scale_x
 adjusted_y = transformed_ankles[:, 1] * scale_y
 
 # Visualiza las posiciones del tobillo transformadas y ajustadas en la imagen de la cancha
+output_path_court = "output/Players_Positions_on_Court_Birds_Eye_View.png"  # Ruta relativa desde 'SRC'
 plt.figure(figsize=(10, 10))
 plt.imshow(cv2.cvtColor(court_image, cv2.COLOR_BGR2RGB))
 plt.scatter(adjusted_x, adjusted_y, c='yellow', s=10)
 plt.title('Players Positions on Court (Bird\'s-Eye View)')
 plt.axis('off')
-plt.show()
+plt.savefig(output_path_court)
+plt.close()

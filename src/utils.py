@@ -1,3 +1,14 @@
+import os
+import cv2
+import tensorflow as tf
+import tensorflow_hub as hub
+import numpy as np
+from collections import deque
+import subprocess
+import gdown
+import shutil
+
+
 def loop_through_people(frame, keypoints, edges, confidence_threshold):
     y, x, c = frame.shape
     for person_keypoints in keypoints:
@@ -84,18 +95,20 @@ def draw_connections(frame, keypoints, edges, confidence_threshold):
 
 # Function to save highlight video using ffmpeg
 def save_highlight_video(frames, output_path):
-    # Write frames to temporary directory
-    temp_dir = '/content/temp_frames/'
-    if not os.path.exists(temp_dir):
-        os.makedirs(temp_dir)
+    # Usa un directorio temporal dentro del espacio de trabajo actual
+    workspace_temp_dir = "temp_frames"  # Asegúrate de que este directorio exista o créalo durante la ejecución
+    temp_dir = os.path.join(os.getcwd(), workspace_temp_dir)
+    os.makedirs(temp_dir, exist_ok=True)  # Crea el directorio si no existe, de manera segura
+    
+    # Guarda los frames en el directorio temporal
     for i, frame in enumerate(frames):
-        cv2.imwrite(os.path.join(temp_dir, f"frame_{i}.png"), frame.copy())
-
-    # Use ffmpeg to create video
-    cmd = f"ffmpeg -framerate 25 -i {temp_dir}/frame_%d.png -c:v libx264 -r 30 -pix_fmt yuv420p {output_path}"
+        cv2.imwrite(os.path.join(temp_dir, f"frame_{i}.png"), frame)
+    
+    # Usa ffmpeg para crear el video desde los frames
+    cmd = f"ffmpeg -framerate 25 -i {os.path.join(temp_dir, 'frame_%d.png')} -c:v libx264 -r 30 -pix_fmt yuv420p {output_path}"
     subprocess.call(cmd, shell=True)
-
-    # Clean up temporary frames
+    
+    # Limpia el directorio temporal eliminando los frames temporales
     shutil.rmtree(temp_dir)
 
 def collect_right_hip_positions(person_keypoints, confidence_threshold, right_hip_positions):
