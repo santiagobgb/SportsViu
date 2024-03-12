@@ -55,7 +55,7 @@ export const postBroadcastNewMember = async (
           message: `Hola ${
             name ?? "Usuario"
           } La inscripción ha quedado completada. La URL del stream es: (${
-            broadcastData?.url
+            broadcastData?.url ?? ""
           }). Al finalizar el partido, recibirás un resumen.`,
         };
       }
@@ -91,7 +91,7 @@ export const postBroadcastNewMember = async (
         message: `Hola ${
           name ?? "Usuario"
         } inscripción ha quedado completada. La URL del stream es: (${
-          broadcastData?.url
+          broadcastData?.url || ""
         }). Al finalizar el partido, recibirás un resumen.`,
         member_id: memberRef.id,
         datos_pendientes: name ?
