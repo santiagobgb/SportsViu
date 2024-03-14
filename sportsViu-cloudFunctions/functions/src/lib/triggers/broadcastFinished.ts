@@ -31,10 +31,9 @@ export const broadcastFinishedTrigger = async (
     info("Sending messages to", user.phone_number);
 
     if (changes.includes("highlight_videos_url")) {
-
-      if(typeof newData.highlight_videos_url === "string") {
+      if (typeof newData.highlight_videos_url === "string") {
         warn("Highlight videos is a string");
-        continue
+        continue;
       }
 
       let counter = 0;
@@ -50,7 +49,7 @@ export const broadcastFinishedTrigger = async (
 
 
     if (changes.includes("heatmap_images_url")) {
-      if(typeof newData.heatmap_images_url === "string") {
+      if (typeof newData.heatmap_images_url === "string") {
         warn("Heat map images is a string");
         continue;
       }

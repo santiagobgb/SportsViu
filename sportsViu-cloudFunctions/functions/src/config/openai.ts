@@ -1,8 +1,10 @@
 import Openai from "openai";
 
-const HELICONE_API_KEY = "sk-helicone-u7ya4iq-tcsemiy-qjecmsq-yg2utny";
+const HELICONE_API_KEY = process.env.HELICONE_API_KEY || "";
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+
 const openAiInstance = new Openai({
-  apiKey: " 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",
+  apiKey: OPENAI_API_KEY,
   baseURL: "https://oai.hconeai.com/v1",
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
