@@ -40,14 +40,14 @@ whatsMessagesController.post("/webhook", async (Request, Response) => {
   const msgBody = localMessage.messageInfo.content;
   const name = bodyParam.entry[0].changes[0].value.contacts[0].profile.name;
 
-  if (msgBody.includes("broadcastId:")) {
-    const broadcastId = msgBody.split("broadcastId:").filter(Boolean);
-    const responsePostVroadcast = await postBroadcastNewMember(
+  if (msgBody.includes("stream:")) {
+    const streamId = msgBody.split("stream:").filter(Boolean);
+    const streamResult = await postBroadcastNewMember(
       from,
-      broadcastId[0].trim(),
+      streamId[0].trim(),
       name
     );
-    await sendWhatsappMessage(from, responsePostVroadcast.message);
+    await sendWhatsappMessage(from, streamResult.message);
     return Response.sendStatus(200);
   }
 

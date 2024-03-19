@@ -3,7 +3,7 @@ import {Change} from "firebase-functions/v1";
 import {sendWhatsappImage, sendWhatsappVideo} from "../whatsapp";
 import {info, warn} from "firebase-functions/logger";
 
-export const broadcastFinishedTrigger = async (
+export const streamFinishedTrigger = async (
   change: Change<firestore.QueryDocumentSnapshot>,
   // context: EventContext<{
   //   documentoId: string;

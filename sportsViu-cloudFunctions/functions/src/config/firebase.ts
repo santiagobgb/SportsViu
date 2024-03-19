@@ -3,4 +3,4 @@ admin.initializeApp();
 
 export const usersCollection = admin.firestore().collection("users");
 export const chatsCollection = admin.firestore().collection("chats");
-export const broadcastCollection = admin.firestore().collection("broadcasts");
+export const streamCollection = admin.firestore().collection("streams");

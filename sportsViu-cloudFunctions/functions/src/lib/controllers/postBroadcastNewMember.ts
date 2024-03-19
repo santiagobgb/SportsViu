@@ -1,16 +1,16 @@
 import {FieldValue} from "firebase-admin/firestore";
-import {usersCollection, broadcastCollection} from "../../config/firebase";
+import {usersCollection, streamCollection} from "../../config/firebase";
 
 
 export const postBroadcastNewMember = async (
   phoneNumber: string,
-  broadcastId: string,
+  streamId: string,
   name: string
 ): Promise<any> => {
-  if (!phoneNumber || !broadcastId) {
+  if (!phoneNumber || !streamId) {
     return {
       status: "Failed",
-      message: "Faltan datos numero de telefono o id de broadcast",
+      message: "Faltan datos numero de telefono o id de stream",
     };
   }
 
@@ -21,18 +21,18 @@ export const postBroadcastNewMember = async (
       .limit(1)
       .get();
 
-    // obtiene la referencia del broadcast
-    console.log("searching for broadcast", broadcastId);
-    const broadcastRef = broadcastCollection .doc(broadcastId.trim());
+    // obtiene la referencia del stream
+    console.log("searching for stream", streamId);
+    const streamRef = streamCollection .doc(streamId.trim());
 
-    // Verifica si la referencia del usuario existe en el array de referencias de broadcastData
+    // Verifica si la referencia del usuario existe en el array de referencias de streamData
     const userRef = queryPhoneNumber.docs[0]?.ref;
 
     if (queryPhoneNumber.size > 0) {
-      // obtiene el documento de broadcast
-      const broadcastData = (await broadcastRef.get()).data();
+      // obtiene el documento de stream
+      const streamData = (await streamRef.get()).data();
 
-      if (broadcastData?.members?.some((ref: any) => ref.isEqual(userRef))) {
+      if (streamData?.members?.some((ref: any) => ref.isEqual(userRef))) {
         return {
           status: "Exist",
           message: `Hola ${
@@ -40,14 +40,14 @@ export const postBroadcastNewMember = async (
           }, ya contabas con el registro en la transmisión. Al finalizar el partido, recibirás un resumen. :)`,
         };
       } else {
-        const updatedMembers = (broadcastData?.members || []).concat(userRef);
+        const updatedMembers = (streamData?.members || []).concat(userRef);
 
-        // Actualiza el documento de broadcast con el nuevo array de members
-        await broadcastRef.update({members: updatedMembers});
+        // Actualiza el documento de stream con el nuevo array de members
+        await streamRef.update({members: updatedMembers});
 
-        // Agrega una referencia al array 'broadcasts'
+        // Agrega una referencia al array 'streams'
         await userRef.update({
-          broadcast_id: FieldValue.arrayUnion(broadcastRef),
+          stream_id: FieldValue.arrayUnion(streamRef),
         });
 
         return {
@@ -55,7 +55,7 @@ export const postBroadcastNewMember = async (
           message: `Hola ${
             name ?? "Usuario"
           } La inscripción ha quedado completada. La URL del stream es: (${
-            broadcastData?.url ?? ""
+            streamData?.url ?? ""
           }). Al finalizar el partido, recibirás un resumen.`,
         };
       }
@@ -63,7 +63,7 @@ export const postBroadcastNewMember = async (
       const newMember = {
         display_name: name ? name : "",
         phone_number: phoneNumber,
-        broadcast_id: broadcastRef ? [broadcastRef] : [],
+        stream_id: streamRef ? [streamRef] : [],
         status: name ? "complete" : "incomplete",
         created_time: FieldValue.serverTimestamp(),
       } as { id?: string };
@@ -75,13 +75,13 @@ export const postBroadcastNewMember = async (
       newMember.id = memberRef.id;
       await memberRef.update({id: newMember.id});
 
-      // obtiene el documento de broadcast
-      const broadcastData = (await broadcastRef.get()).data();
+      // obtiene el documento de stream
+      const streamData = (await streamRef.get()).data();
 
-      // Agrega el documentRef del nuevo miembro a la lista 'users' en el documento de 'broadcast'
+      // Agrega el documentRef del nuevo miembro a la lista 'users' en el documento de 'stream'
 
-      await broadcastCollection
-        .doc(broadcastRef.id)
+      await streamCollection
+        .doc(streamRef.id)
         .update({
           members: FieldValue.arrayUnion(memberRef),
         });
@@ -91,7 +91,7 @@ export const postBroadcastNewMember = async (
         message: `Hola ${
           name ?? "Usuario"
         } inscripción ha quedado completada. La URL del stream es: (${
-          broadcastData?.url || ""
+          streamData?.url || ""
         }). Al finalizar el partido, recibirás un resumen.`,
         member_id: memberRef.id,
         datos_pendientes: name ?
@@ -103,7 +103,7 @@ export const postBroadcastNewMember = async (
     console.log("error", err);
     return {
       status: "Failed",
-      message: `Hola ${name}, no se identificó ese partido; es posible que haya un error en el ID del broadcast :)`,
+      message: `Hola ${name}, no se identificó ese partido; es posible que haya un error en el ID del stream :)`,
     };
   }
 };
